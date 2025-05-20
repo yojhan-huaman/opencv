@@ -5,215 +5,219 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Detección de Formas Geométricas</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet" />
-  <style>
-    * {
-      box-sizing: border-box;
+<style>
+  :root {
+    --color-primario: #2e7d32;
+    --color-secundario: #66bb6a;
+    --color-fondo: #e8f5e9;
+    --color-hover: #1b5e20;
+    --color-texto: #2e7d32;
+    --color-claro: #c8e6c9;
+    --sombra: 0 6px 15px rgba(0, 0, 0, 0.1);
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(135deg, var(--color-fondo), var(--color-claro));
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  h1, h2 {
+    color: var(--color-primario);
+    margin: 40px 20px 20px;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.05);
+    animation: fadeSlideDown 0.8s ease forwards;
+    opacity: 0;
+  }
+
+  form {
+    background: #ffffff;
+    padding: 30px;
+    border-radius: 16px;
+    box-shadow: var(--sombra);
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    align-items: center;
+    border: 2px solid var(--color-secundario);
+    max-width: 90%;
+    width: 500px;
+    animation: fadeSlideUp 1s ease forwards;
+    opacity: 0;
+  }
+
+  input[type="file"] {
+    padding: 12px;
+    border: 2px dashed var(--color-secundario);
+    border-radius: 10px;
+    background-color: var(--color-fondo);
+    font-size: 16px;
+    color: var(--color-texto);
+    cursor: pointer;
+    width: 100%;
+    transition: border-color 0.3s ease;
+  }
+
+  input[type="file"]:hover {
+    border-color: var(--color-hover);
+  }
+
+  input[type="file"]::file-selector-button {
+    background-color: var(--color-secundario);
+    border: none;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+
+  input[type="file"]::file-selector-button:hover {
+    background-color: var(--color-hover);
+  }
+
+  .form-submit-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    align-items: center;
+    justify-content: center;
+  }
+
+  button {
+    background-color: var(--color-primario);
+    color: white;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 10px rgba(46, 125, 50, 0.4);
+  }
+
+  button:hover {
+    background-color: var(--color-hover);
+    transform: scale(1.05);
+  }
+
+  a {
+    background: #388e3c;
+    color: white;
+    padding: 12px 25px;
+    border-radius: 10px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: background 0.3s ease;
+  }
+
+  a:hover {
+    background: #2e7d32;
+  }
+
+  #spinner {
+    display: none;
+    border: 4px solid var(--color-claro);
+    border-top: 4px solid var(--color-primario);
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    animation: spin 1s linear infinite;
+  }
+
+  img {
+    margin-top: 30px;
+    max-width: 90%;
+    border-radius: 12px;
+    border: 4px solid var(--color-secundario);
+    box-shadow: var(--sombra);
+    animation: fadeIn 1s ease forwards;
+  }
+
+  ul {
+    list-style: none;
+    padding: 0;
+    margin-top: 20px;
+    width: 100%;
+    max-width: 400px;
+    animation: fadeIn 1s ease forwards;
+  }
+
+  li {
+    background: var(--color-fondo);
+    border-left: 5px solid var(--color-secundario);
+    padding: 12px 20px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    font-size: 16px;
+    color: var(--color-texto);
+    font-weight: 500;
+    transition: background 0.3s ease, transform 0.3s ease;
+  }
+
+  li:hover {
+    background: #dcedc8;
+    transform: scale(1.03);
+  }
+
+  strong {
+    color: #388e3c;
+  }
+
+  /* Animaciones */
+  @keyframes fadeSlideUp {
+    from { opacity: 0; transform: translateY(40px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fadeSlideDown {
+    from { opacity: 0; transform: translateY(-40px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  /* Responsive */
+  @media (max-width: 600px) {
+    form {
+      padding: 20px;
+      width: 95%;
     }
 
-    body {
-      font-family: 'Poppins', sans-serif;
-      background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
-      margin: 0;
-      padding: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      min-height: 100vh;
-      text-align: center;
+    button, a {
+      width: 100%;
     }
 
     h1, h2 {
-      color: #1b5e20;
-      margin-top: 40px;
-      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
-      animation: fadeSlideDown 0.8s ease forwards;
-      opacity: 0;
+      font-size: 22px;
     }
 
-    form {
-      background: #f1f8e9;
-      padding: 30px;
-      border-radius: 12px;
-      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
-      margin-top: 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-      align-items: center;
-      border: 2px solid #66bb6a;
-      max-width: 90%;
-      width: 500px;
-      animation: fadeSlideUp 1s ease forwards;
-      opacity: 0;
+    li, input[type="file"] {
+      font-size: 14px;
     }
-
-    input[type="file"] {
-      padding: 12px;
-      border: 2px dashed #81c784;
-      border-radius: 8px;
-      background-color: #e8f5e9;
-      font-size: 16px;
-      color: #2e7d32;
-      cursor: pointer;
-      width: 100%;
-      transition: border-color 0.3s ease;
-    }
-
-    input[type="file"]:hover {
-      border-color: #43a047;
-    }
-
-    input[type="file"]::file-selector-button {
-      background-color: #66bb6a;
-      border: none;
-      color: white;
-      padding: 8px 15px;
-      border-radius: 6px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background-color 0.3s;
-    }
-
-    input[type="file"]::file-selector-button:hover {
-      background-color: #43a047;
-    }
-
-    button {
-      background-color: #2e7d32;
-      color: white;
-      border: none;
-      padding: 12px 30px;
-      border-radius: 8px;
-      font-size: 16px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      box-shadow: 0 4px 10px rgba(46, 125, 50, 0.4);
-      position: relative;
-    }
-
-    button:hover {
-      background-color: #1b5e20;
-      transform: scale(1.05);
-    }
-
-    #spinner {
-      display: none;
-      border: 4px solid #c8e6c9;
-      border-top: 4px solid #2e7d32;
-      border-radius: 50%;
-      width: 24px;
-      height: 24px;
-      animation: spin 1s linear infinite;
-      margin-left: 10px;
-    }
-
-    .form-submit-wrapper {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    img {
-      margin-top: 30px;
-      max-width: 90%;
-      border-radius: 10px;
-      border: 4px solid #66bb6a;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
-      animation: fadeIn 1s ease forwards;
-    }
-
-    ul {
-      list-style: none;
-      padding: 0;
-      margin-top: 20px;
-      width: 100%;
-      max-width: 400px;
-      animation: fadeIn 1s ease forwards;
-    }
-
-    li {
-      background: #e8f5e9;
-      border-left: 5px solid #66bb6a;
-      padding: 12px 20px;
-      margin-bottom: 10px;
-      border-radius: 6px;
-      font-size: 16px;
-      color: #2e7d32;
-      font-weight: 500;
-      transition: background 0.3s ease, transform 0.3s ease;
-    }
-
-    li:hover {
-      background: #dcedc8;
-      transform: scale(1.03);
-    }
-
-    strong {
-      color: #388e3c;
-    }
-
-    /* Animaciones */
-    @keyframes fadeSlideUp {
-      from {
-        opacity: 0;
-        transform: translateY(40px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    @keyframes fadeSlideDown {
-      from {
-        opacity: 0;
-        transform: translateY(-40px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    @keyframes fadeIn {
-      from {
-        opacity: 0;
-      }
-      to {
-        opacity: 1;
-      }
-    }
-
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-
-    /* RESPONSIVE */
-    @media (max-width: 600px) {
-      form {
-        padding: 20px;
-        width: 90%;
-      }
-
-      button {
-        width: 100%;
-      }
-
-      input[type="file"] {
-        font-size: 14px;
-      }
-
-      li {
-        font-size: 14px;
-      }
-
-      h1, h2 {
-        font-size: 22px;
-      }
-    }
-  </style>
+  }
+</style>
 </head>
 <body>
   <h1>Detección de Formas Geométricas</h1>
