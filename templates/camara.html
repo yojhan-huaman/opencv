@@ -3,95 +3,175 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Detección en Vivo</title>
+  <title>Detección en Tiempo Real</title>
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       font-family: 'Poppins', sans-serif;
-      background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
-      text-align: center;
+      background: linear-gradient(135deg, #e3f2fd, #c5cae9);
+      margin: 0;
       padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
     }
 
     h1 {
-      color: #1b5e20;
-      margin-bottom: 20px;
+      color: #283593;
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+      margin-bottom: 10px;
     }
 
-    .video-container {
-      display: inline-block;
-      border: 4px solid #66bb6a;
-      border-radius: 10px;
-      overflow: hidden;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    video, canvas {
+      margin: 10px 0;
+      max-width: 100%;
+      border-radius: 12px;
+      border: 4px solid #7986cb;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
     }
 
     ul {
       list-style: none;
       padding: 0;
       margin-top: 20px;
-      display: inline-block;
-      background: #f1f8e9;
-      border-radius: 10px;
-      padding: 20px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 400px;
     }
 
     li {
-      font-weight: 600;
-      color: #2e7d32;
-      margin: 8px 0;
+      background: #e8eaf6;
+      border-left: 5px solid #7986cb;
+      padding: 12px 20px;
+      margin-bottom: 10px;
+      border-radius: 6px;
       font-size: 16px;
+      color: #3949ab;
+      font-weight: 500;
     }
 
     a {
       display: inline-block;
-      margin-top: 30px;
+      margin-top: 20px;
+      padding: 10px 16px;
       text-decoration: none;
       color: white;
-      background: #2e7d32;
-      padding: 10px 20px;
-      border-radius: 8px;
-      font-weight: bold;
+      background-color: #5c6bc0;
+      border-radius: 6px;
+      transition: background 0.3s ease;
     }
 
     a:hover {
-      background: #1b5e20;
+      background-color: #3949ab;
+    }
+
+    #loading {
+      color: #3949ab;
+      font-size: 16px;
+      margin-top: 20px;
+      animation: pulse 1s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
     }
   </style>
 </head>
 <body>
-  <h1>Detección en Tiempo Real</h1>
 
-  <div class="video-container">
-    <img src="{{ url_for('video_feed') }}" width="640" height="480">
-  </div>
+  <h1>Detección de Formas Geométricas</h1>
+
+  <video id="video" width="640" height="480" autoplay muted playsinline style="display: none;"></video>
+  <canvas id="canvas" width="640" height="480"></canvas>
+
+  <div id="loading">Procesando...</div>
 
   <ul id="estadisticas-lista">
     <li>Cargando estadísticas...</li>
   </ul>
 
-  <a href="{{ url_for('index') }}">Volver</a>
+  <a href="{{ url_for('index') }}">← Volver al inicio</a>
 
   <script>
-    function actualizarEstadisticas() {
-      fetch('/estadisticas')
-        .then(response => response.json())
-        .then(data => {
-          const lista = document.getElementById('estadisticas-lista');
-          lista.innerHTML = '';
-          for (const [forma, cantidad] of Object.entries(data)) {
-            if (cantidad > 0) {
-              const item = document.createElement('li');
-              item.textContent = `${forma}: ${cantidad}`;
-              lista.appendChild(item);
-            }
-          }
-        });
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const loading = document.getElementById('loading');
+    let procesando = false;
+
+    navigator.mediaDevices.getUserMedia({ video: true })
+      .then(stream => {
+        video.srcObject = stream;
+        video.play();
+        requestAnimationFrame(capturaLoop);
+      })
+      .catch(err => {
+        console.error("Error accediendo a la cámara:", err);
+      });
+
+    function capturaLoop() {
+      if (!procesando && video.readyState === video.HAVE_ENOUGH_DATA) {
+        procesando = true;
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+        canvas.toBlob(blob => {
+          const formData = new FormData();
+          formData.append('imagen', blob, 'captura.jpg');
+
+          fetch('/procesar_imagen', {
+            method: 'POST',
+            body: formData
+          })
+          .then(response => response.json())
+          .then(data => {
+            if (data.imagen) mostrarImagenProcesada(data.imagen);
+            if (data.estadisticas) actualizarEstadisticas(data.estadisticas);
+            procesando = false;
+            requestAnimationFrame(capturaLoop);
+          })
+          .catch(err => {
+            console.error('Error al enviar la imagen:', err);
+            procesando = false;
+            requestAnimationFrame(capturaLoop);
+          });
+        }, 'image/jpeg');
+      } else {
+        requestAnimationFrame(capturaLoop);
+      }
     }
 
-    // Actualiza cada 1 segundo
-    setInterval(actualizarEstadisticas, 1000);
-    actualizarEstadisticas();
+    function mostrarImagenProcesada(imagenBase64) {
+      loading.style.display = "none";
+      const img = new Image();
+      img.onload = () => {
+        canvas.width = img.width;
+        canvas.height = img.height;
+        ctx.drawImage(img, 0, 0);
+      };
+      img.src = 'data:image/jpeg;base64,' + imagenBase64;
+    }
+
+    function actualizarEstadisticas(estadisticas) {
+      const lista = document.getElementById('estadisticas-lista');
+      lista.innerHTML = '';
+      for (const [forma, cantidad] of Object.entries(estadisticas)) {
+        if (cantidad > 0) {
+          const item = document.createElement('li');
+          item.textContent = `${forma}: ${cantidad}`;
+          lista.appendChild(item);
+        }
+      }
+
+      if (lista.children.length === 0) {
+        lista.innerHTML = '<li>No se detectaron formas</li>';
+      }
+    }
   </script>
 </body>
 </html>
